@@ -27,8 +27,9 @@ app.use("/api/product",productRoutes)
 app.use("/api/cart",cartRoutes)
 app.use("/api/order",orderRoutes)
 
-
-
+app.get("/", (req, res) => {
+    res.send("API is working");
+});
 
 app.listen(port,()=>{
     console.log("Hello From Server")
