@@ -16,9 +16,14 @@ let app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+
+const allowedOrigins = process.env.FRONTEND_URLS 
+    ? process.env.FRONTEND_URLS.split(',') 
+    : ["http://localhost:5173", "http://localhost:5174"];
+
 app.use(cors({
-origin: process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : ["http://localhost:5173", "http://localhost:5174"], 
-    credentials: true
+ origin: allowedOrigins,
+ credentials: true
 }))
 
 app.use("/api/auth",authRoutes)
