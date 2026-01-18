@@ -22,6 +22,9 @@ function Login() {
             e.preventDefault()
             try {
               const result = await axios.post(serverUrl + '/api/auth/adminlogin',{email , password} , {withCredentials:true})
+              if (result.status === 200) {
+                localStorage.setItem('token', result.data) 
+              }
               console.log(result.data)
               toast.success("AdminLogin Successfully")
               getAdmin()
