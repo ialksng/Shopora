@@ -12,7 +12,7 @@ import { MdContacts } from "react-icons/md";
 import axios from 'axios';
 import { authDataContext } from '../context/AuthContext';
 import { shopDataContext } from '../context/ShopContext';
-import { set } from 'mongoose';
+
 function Nav() {
     let {getCurrentUser , userData} = useContext(userDataContext)
     let {serverUrl} = useContext(authDataContext)
