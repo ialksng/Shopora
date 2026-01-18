@@ -32,7 +32,11 @@ function Registration() {
          const result = await axios.post(serverUrl + '/api/auth/registration',{
             name,email,password
          },{withCredentials:true})
+
+            console.log("Registration success:", result.data)
+
             getCurrentUser()
+
             navigate("/")
             toast.success("User Registration Successful")
             console.log(result.data)
@@ -40,7 +44,13 @@ function Registration() {
 
         } catch (error) {
             console.log(error)
-            toast.error("User Registration Failed")
+            setLoading(false)
+        
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message); 
+            } else {
+                toast.error("User Registration Failed");
+            }
         }
     }
 
