@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import React from 'react'
 import Logo from "../assets/logo.png"
 import { useNavigate } from 'react-router-dom'
@@ -51,6 +52,7 @@ function Login() {
     
                 const result = await axios.post(serverUrl + "/api/auth/googlelogin" ,{name , email} , {withCredentials:true})
                 console.log(result.data)
+                localStorage.setItem('token', result.data.token)
                 getCurrentUser()
             navigate("/")
     
