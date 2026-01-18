@@ -35,7 +35,7 @@ function ShopContext({children}) {
       return;
     }
 
-    let cartData = structuredClone(cartItem); // Clone the product
+    let cartData = structuredClone(cartItem); 
 
     if (cartData[itemId]) {
       if (cartData[itemId][size]) {
@@ -54,36 +54,37 @@ function ShopContext({children}) {
     if (userData) {
       setLoading(true)
       try {
-      let result = await axios.post(serverUrl + "/api/cart/add" , {itemId,size} , {withCredentials: true})
-      console.log(result.data)
-      toast.success("Product Added")
-      setLoading(false)
+const token = localStorage.getItem('token'); 
 
-
-       
-      }
-      catch (error) {
+        let result = await axios.post(serverUrl + "/api/cart/add", 
+            { itemId, size }, 
+            { 
+                headers: { token }, 
+                withCredentials: true 
+            }
+        )
+        console.log(result.data)
+        toast.success("Product Added")
+        setLoading(false)
+    } catch (error) {
         console.log(error)
         setLoading(false)
-        toast.error("Add Cart Error")
-       
-      }
-     
-    } 
+        toast.error(error.response?.data?.message || "Add Cart Error")
     }
+}
 
 
-    const getUserCart = async () => {
-      try {
-        const result = await axios.post(serverUrl + '/api/cart/get',{},{ withCredentials: true })
-
-      setCartItem(result.data)
+const getUserCart = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const result = await axios.post(serverUrl + '/api/cart/get', {}, 
+            { headers: { token }, withCredentials: true }
+        )
+        setCartItem(result.data)
     } catch (error) {
-      console.log(error)
-     
-
-
+        console.log(error)
     }
+}
       
     }
     const updateQuantity = async (itemId , size , quantity) => {

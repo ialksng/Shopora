@@ -32,6 +32,7 @@ function Login() {
             },{withCredentials:true})
             console.log(result.data)
             setLoading(false)
+            localStorage.setItem('token', result.data.token)
             getCurrentUser()
             navigate("/")
             toast.success("User Login Successful")

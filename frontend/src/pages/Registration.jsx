@@ -63,13 +63,20 @@ function Registration() {
 
             const result = await axios.post(serverUrl + "/api/auth/googlelogin" ,{name , email} , {withCredentials:true})
             console.log(result.data)
+            localStorage.setItem('token', result.data.token)
             getCurrentUser()
             navigate("/")
             toast.success("User Registration Successful")
 
         } catch (error) {
             console.log(error)
-            toast.error("User Registration Failed")
+
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message); // Shows: "User already exist" or "Enter Strong Password"
+            } else {
+                toast.error(error.message || "User Registration Failed");
+            }
+            setLoading(false);
         }
         
     }
