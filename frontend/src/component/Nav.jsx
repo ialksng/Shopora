@@ -14,7 +14,7 @@ import { authDataContext } from '../context/AuthContext';
 import { shopDataContext } from '../context/ShopContext';
 
 function Nav() {
-    let {getCurrentUser , userData} = useContext(userDataContext)
+    let {getCurrentUser , userData, setUserData} = useContext(userDataContext)
     let {serverUrl} = useContext(authDataContext)
     let {showSearch,setShowSearch,search,setSearch,getCartCount} = useContext(shopDataContext)
     let [showProfile,setShowProfile] = useState(false)
