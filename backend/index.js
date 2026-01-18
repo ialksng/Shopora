@@ -18,10 +18,8 @@ app.use(express.json())
 app.use(cookieParser())
 
 const allowedOrigins = [
-  "http://localhost:5173", 
-  "http://localhost:5174",
   "https://shopora-frontend.onrender.com", 
-  "https://shopora-admin.onrender.com/"    
+  "https://shopora-admin.onrender.com"    
 ];
 
 app.use(cors({
