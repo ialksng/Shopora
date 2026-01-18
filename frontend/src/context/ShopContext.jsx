@@ -4,38 +4,40 @@ import axios from 'axios'
 import { userDataContext } from './UserContext'
 import { toast } from 'react-toastify'
 
- export const shopDataContext = createContext()
-function ShopContext({children}) {
+export const shopDataContext = createContext(null);
 
-    let [products,setProducts] = useState([])
-    let [search,setSearch] = useState('')
-    let {userData} = useContext(userDataContext)
-    let [showSearch,setShowSearch] = useState(false)
-    let {serverUrl} = useContext(authDataContext)
-    let [cartItem, setCartItem] = useState({});
-      let [loading,setLoading] = useState(false)
-    let currency = '₹';
-    let delivery_fee = 40;
+function ShopContext({ children }) {
+  const [products, setProducts] = useState([])
+  const [search, setSearch] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+  const [cartItem, setCartItem] = useState({});
+  const [loading, setLoading] = useState(false)
+  
+  const { userData } = useContext(userDataContext);
+  const { serverUrl } = useContext(authDataContext);
 
-    const getProducts = async () => {
-        try {
-            let result = await axios.get(serverUrl + "/api/product/list")
-            console.log(result.data)
-            setProducts(result.data)
-        } catch (error) {
-            console.log(error)
-        }
-        
+  const currency = '₹';
+  const delivery_fee = 40;
+
+  const getProducts = async () => {
+    if (!serverUrl) return;
+    try {
+      const result = await axios.get(serverUrl + "/api/product/list")
+      setProducts(result.data)
+    } catch (error) {
+      console.log(error)
+      toast.error("Failed to load products")
     }
+  }
 
-
-    const addtoCart = async (itemId , size) => {
-       if (!size) {
-      console.log("Select Product Size");
+  const addtoCart = async (itemId, size) => {
+    if (!size) {
+      toast.error("Select Product Size");
       return;
     }
 
-    let cartData = structuredClone(cartItem); 
+    // Safer clone method than structuredClone
+    let cartData = JSON.parse(JSON.stringify(cartItem));
 
     if (cartData[itemId]) {
       if (cartData[itemId][size]) {
@@ -47,62 +49,54 @@ function ShopContext({children}) {
       cartData[itemId] = {};
       cartData[itemId][size] = 1;
     }
-  
+
     setCartItem(cartData);
-  
 
     if (userData) {
       setLoading(true)
       try {
-const token = localStorage.getItem('token'); 
-
-        let result = await axios.post(serverUrl + "/api/cart/add", 
-            { itemId, size }, 
-            { 
-                headers: { token }, 
-                withCredentials: true 
-            }
+        const token = localStorage.getItem('token'); // Use token header
+        await axios.post(serverUrl + "/api/cart/add", 
+          { itemId, size }, 
+          { headers: { token }, withCredentials: true }
         )
-        console.log(result.data)
         toast.success("Product Added")
-        setLoading(false)
-    } catch (error) {
+      } catch (error) {
         console.log(error)
+        toast.error("Add Cart Error")
+      } finally {
         setLoading(false)
-        toast.error(error.response?.data?.message || "Add Cart Error")
+      }
     }
-}
+  }
 
-
-const getUserCart = async () => {
+  const getUserCart = async () => {
+    if (!userData || !serverUrl) return; // Only fetch if user exists
     try {
-        const token = localStorage.getItem('token');
-        const result = await axios.post(serverUrl + '/api/cart/get', {}, 
-            { headers: { token }, withCredentials: true }
-        )
-        setCartItem(result.data)
+      const token = localStorage.getItem('token');
+      const result = await axios.post(serverUrl + '/api/cart/get', {}, { headers: { token }, withCredentials: true })
+      setCartItem(result.data)
     } catch (error) {
-        console.log(error)
+      console.log(error)
     }
-}
-      
-    }
-    const updateQuantity = async (itemId , size , quantity) => {
-      let cartData = structuredClone(cartItem);
+  }
+
+  const updateQuantity = async (itemId, size, quantity) => {
+    let cartData = JSON.parse(JSON.stringify(cartItem));
     cartData[itemId][size] = quantity
     setCartItem(cartData)
 
     if (userData) {
       try {
-        await axios.post(serverUrl + "/api/cart/update", { itemId, size, quantity }, { withCredentials: true })
+        const token = localStorage.getItem('token');
+        await axios.post(serverUrl + "/api/cart/update", { itemId, size, quantity }, { headers: { token }, withCredentials: true })
       } catch (error) {
         console.log(error)
-        
       }
     }
-      
-    }
-     const getCartCount = () => {
+  }
+
+  const getCartCount = () => {
     let totalCount = 0;
     for (const items in cartItem) {
       for (const item in cartItem[items]) {
@@ -110,54 +104,45 @@ const getUserCart = async () => {
           if (cartItem[items][item] > 0) {
             totalCount += cartItem[items][item]
           }
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
     }
     return totalCount
   }
 
   const getCartAmount = () => {
-  let totalAmount = 0;
+    let totalAmount = 0;
     for (const items in cartItem) {
       let itemInfo = products.find((product) => product._id === items);
-      for (const item in cartItem[items]) {
-        try {
-          if (cartItem[items][item] > 0) {
-            totalAmount += itemInfo.price * cartItem[items][item];
-          }
-        } catch (error) {
-
+      if (itemInfo) { // Check if product exists
+        for (const item in cartItem[items]) {
+          try {
+            if (cartItem[items][item] > 0) {
+              totalAmount += itemInfo.price * cartItem[items][item];
+            }
+          } catch (error) {}
         }
       }
     }
     return totalAmount
-    
   }
 
-    useEffect(()=>{
-     getProducts()
-    },[])
+  useEffect(() => {
+    getProducts()
+  }, [serverUrl]) 
 
-    useEffect(() => {
+  useEffect(() => {
     getUserCart()
-  },[])
+  }, [userData]) 
 
+  const value = {
+    products, currency, delivery_fee, getProducts, search, setSearch, showSearch, setShowSearch, cartItem, addtoCart, getCartCount, setCartItem, updateQuantity, getCartAmount, loading
+  }
 
-
-
-
-
-    let value = {
-      products, currency , delivery_fee,getProducts,search,setSearch,showSearch,setShowSearch,cartItem, addtoCart, getCartCount, setCartItem ,updateQuantity,getCartAmount,loading
-    }
   return (
-    <div>
     <shopDataContext.Provider value={value}>
       {children}
-      </shopDataContext.Provider>
-    </div>
+    </shopDataContext.Provider>
   )
 }
 

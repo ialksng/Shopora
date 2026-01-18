@@ -1,6 +1,6 @@
 import React from 'react'
-import { createContext } from 'react'
-export const authDataContext= createContext()
+import { createContext, useState } from 'react'
+export const authDataContext= createContext(null);
 function AuthContext({children}) {
 let serverUrl = "https://shopora-i1d1.onrender.com"
 
@@ -8,14 +8,9 @@ let serverUrl = "https://shopora-i1d1.onrender.com"
        serverUrl
     }
   return (
-
-    
-    <div>
         <authDataContext.Provider value={value}>
             {children}
         </authDataContext.Provider>
-      
-    </div>
   )
 }
 
